@@ -642,8 +642,8 @@ JS
      */
     private function _getHashPath($files , $type= 'css-compress')
     {
-        if(isset(array_keys($files)[0])){
-            return preg_replace('/(.*assets\/)(\w*\/[css|js]*)(\/.*)/', '$2', (string)array_keys($files)[0]);
+        if(isset(array_keys($files)[count($files) -1])){
+            return preg_replace('/(.*assets\/)(\w*\/[css|js]*)(\/.*)/', '$2', (string)array_keys($files)[count($files) -1]);
         }
         return $type === 'css-compress' ? 'css-compress' : 'js-compress';
     }
