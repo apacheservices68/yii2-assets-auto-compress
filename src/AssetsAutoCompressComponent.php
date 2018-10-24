@@ -328,11 +328,12 @@ JS
      */
     protected function _processingJsFiles($files = [])
     {
+        $hashPath  =$this->_getHashPath($files,'js-compress');
         $fileName = md5(implode(array_keys($files)).$this->getSettingsHash()).'.js';
-        $publicUrl = \Yii::$app->assetManager->baseUrl.'/js-compress/'.$fileName;
+        $publicUrl = \Yii::$app->assetManager->baseUrl.'/'.$hashPath.'/'.$fileName;
         //$publicUrl  = \Yii::getAlias('@web/assets/js-compress/' . $fileName);
 
-        $rootDir = \Yii::$app->assetManager->basePath.'/js-compress';
+        $rootDir = \Yii::$app->assetManager->basePath.'/'.$hashPath;
         //$rootDir    = \Yii::getAlias('@webroot/assets/js-compress');
         $rootUrl = $rootDir.'/'.$fileName;
 
@@ -348,7 +349,7 @@ JS
             }
 
 
-            $publicUrl = $publicUrl."?v=".filemtime($rootUrl);
+            $publicUrl = YII_DEBUG ? $publicUrl."?v=".filemtime($rootUrl) : $publicUrl;
             $resultFiles[$publicUrl] = Html::jsFile($publicUrl, $this->jsOptions);
             return $resultFiles;
         }
@@ -493,11 +494,12 @@ JS
      */
     protected function _processingCssFiles($files = [])
     {
+        $hashPath  =$this->_getHashPath($files);
         $fileName = md5(implode(array_keys($files)).$this->getSettingsHash()).'.css';
-        $publicUrl = \Yii::$app->assetManager->baseUrl.'/css-compress/'.$fileName;
+        $publicUrl = \Yii::$app->assetManager->baseUrl.'/'.$hashPath.'/'.$fileName;
         //$publicUrl  = \Yii::getAlias('@web/assets/css-compress/' . $fileName);
 
-        $rootDir = \Yii::$app->assetManager->basePath.'/css-compress';
+        $rootDir = \Yii::$app->assetManager->basePath.'/'.$hashPath;
         //$rootDir    = \Yii::getAlias('@webroot/assets/css-compress');
         $rootUrl = $rootDir.'/'.$fileName;
 
@@ -512,7 +514,7 @@ JS
                 }
             }
 
-            $publicUrl = $publicUrl."?v=".filemtime($rootUrl);
+            $publicUrl = YII_DEBUG ? $publicUrl."?v=".filemtime($rootUrl) : $publicUrl;
             $resultFiles[$publicUrl] = Html::cssFile($publicUrl, $this->cssOptions);
             return $resultFiles;
         }
@@ -623,7 +625,7 @@ JS
         if ($this->htmlFormatter instanceof IFormatter) {
             $r = new \ReflectionClass($this->htmlFormatter);
             \Yii::beginProfile('Format html: ' . $r->getName());
-                $result = $this->htmlFormatter->format($html);
+            $result = $this->htmlFormatter->format($html);
             \Yii::endProfile('Format html: ' . $r->getName());
             return $result;
         }
@@ -631,6 +633,19 @@ JS
         \Yii::warning("Html formatter error");
 
         return $html;
+    }
+
+    /**
+     * @param $files
+     * @param string $type
+     * @return string
+     */
+    private function _getHashPath($files , $type= 'css-compress')
+    {
+        if(isset(array_keys($files)[0])){
+            return preg_replace('/(.*assets\/)(\w*\/[css|js]*)(\/.*)/', '$2', (string)array_keys($files)[0]);
+        }
+        return $type === 'css-compress' ? 'css-compress' : 'js-compress';
     }
 
 
